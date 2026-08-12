@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wilderness Journey</title>
+  <style>
+    :root {
+      --bg: #1b120d;
+      --bg-soft: #241a13;
+      --card: #2b1f17;
+      --border: rgba(232, 131, 74, 0.22);
+      --ember: #e8834a;
+      --ember-light: #f4a86b;
+      --ember-dark: #b85a2c;
+      --text: #f6ecdf;
+      --muted: #c7ab90;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, #3a2417 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    nav {
+      background: #000;
+      padding: 1rem;
+    }
+
+    nav a.logo {
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    /* Hero */
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ember-light);
+      background: rgba(232, 131, 74, 0.12);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin: 0 0 0.15rem;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--ember-light);
+      font-weight: 600;
+      margin: 0 0 1rem;
+    }
+
+    blockquote.tagline {
+      margin: 0 0 1.4rem;
+      padding: 0.9rem 1.1rem;
+      border-left: 3px solid var(--ember);
+      background: var(--bg-soft);
+      border-radius: 0 10px 10px 0;
+      font-style: italic;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
+    .purpose {
+      color: var(--muted);
+      font-size: 0.98rem;
+      margin-bottom: 2.2rem;
+    }
+
+    h2 {
+      font-size: 1.05rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ember-light);
+      margin: 0 0 1rem;
+    }
+
+    section {
+      margin-bottom: 2.6rem;
+    }
+
+    /* Stat row */
+    .stat-row {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.6rem;
+    }
+
+    .stat {
+      flex: 1 1 130px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+    }
+
+    .stat .num {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--ember-light);
+    }
+
+    .stat .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* Timeline diagram */
+    .timeline {
+      position: relative;
+      padding-left: 3rem;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 1.15rem;
+      top: 0.6rem;
+      bottom: 0.6rem;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--ember), var(--ember-dark) 85%, var(--ember-light));
+      opacity: 0.55;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 1.6rem;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .timeline-icon {
+      position: absolute;
+      left: -3rem;
+      top: 0;
+      width: 2.3rem;
+      height: 2.3rem;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, var(--ember-light), var(--ember-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      box-shadow: 0 0 0 4px var(--bg), 0 4px 14px rgba(232, 131, 74, 0.35);
+    }
+
+    .timeline-item.final .timeline-icon {
+      background: radial-gradient(circle at 35% 30%, #fff2e2, var(--ember));
+      font-size: 1.25rem;
+    }
+
+    .timeline-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .timeline-sub {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    /* Tribe info card */
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+      font-size: 0.94rem;
+      color: var(--muted);
+    }
+
+    .info-card strong {
+      color: var(--text);
+    }
+
+    .info-card ul {
+      margin: 0.6rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    /* Station cards */
+    .station {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 1.1rem;
+      overflow: hidden;
+    }
+
+    .station-head {
+      padding: 1.1rem 1.2rem;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+
+    .station-num {
+      flex-shrink: 0;
+      width: 2.2rem;
+      height: 2.2rem;
+      border-radius: 50%;
+      background: rgba(232, 131, 74, 0.15);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+    }
+
+    .station-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      margin: 0 0 0.1rem;
+    }
+
+    .station-ref {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .chip {
+      font-size: 0.72rem;
+      padding: 0.22rem 0.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    .chip.weak {
+      color: #f4b3a3;
+      background: rgba(230, 90, 60, 0.12);
+    }
+
+    .chip.good {
+      color: #a9e0b9;
+      background: rgba(70, 170, 110, 0.12);
+    }
+
+    .goal {
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    details {
+      border-top: 1px solid var(--border);
+    }
+
+    summary {
+      cursor: pointer;
+      padding: 0.85rem 1.2rem;
+      font-size: 0.86rem;
+      color: var(--ember-light);
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      user-select: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::before {
+      content: "\25B8";
+      display: inline-block;
+      transition: transform 0.15s ease;
+    }
+
+    details[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .details-body {
+      padding: 0 1.2rem 1.2rem;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .details-body h4 {
+      color: var(--text);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin: 0.9rem 0 0.4rem;
+    }
+
+    .details-body h4:first-child {
+      margin-top: 0;
+    }
+
+    .details-body ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+
+    .details-body li {
+      margin-bottom: 0.3rem;
+    }
+
+    .twist {
+      background: rgba(232, 131, 74, 0.1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.8rem 0.9rem;
+      margin: 0.9rem 0;
+      font-size: 0.88rem;
+    }
+
+    .twist .twist-label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ember-light);
+      margin-bottom: 0.3rem;
+      font-weight: 700;
+    }
+
+    /* Final gathering */
+    .recap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .recap-table th,
+    .recap-table td {
+      text-align: left;
+      padding: 0.65rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .recap-table th {
+      color: var(--ember-light);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .recap-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    blockquote.closing {
+      margin: 1.4rem 0 0;
+      padding: 1rem 1.1rem;
+      border-left: 3px solid var(--ember);
+      background: var(--bg-soft);
+      border-radius: 0 10px 10px 0;
+      font-style: italic;
+      color: var(--text);
+      font-size: 0.98rem;
+    }
+
+    blockquote.closing p {
+      margin: 0 0 0.5rem;
+    }
+
+    blockquote.closing p:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <span class="eyebrow">Leader Script &middot; Updated Edition</span>
+    <h1>Wilderness Journey</h1>
+    <p class="subtitle">Weakness &rarr; Goodness</p>
+    <blockquote class="tagline">&ldquo;The wilderness reveals our weakness, but God's goodness is greater.&rdquo;</blockquote>
+    <p class="purpose">
+      Participants enter the wilderness as tribes of Israel and encounter fear, the desire for control,
+      self-reliance, complaining, and uncertainty. Each station sharpens its twist so it's <em>felt</em>,
+      not just explained &mdash; the goal is for students to recognize themselves in Israel's story. At the
+      end, they discover that every weakness is met by God's goodness.
+    </p>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="num">4</div>
+        <div class="label">Tribes of Israel</div>
+      </div>
+      <div class="stat">
+        <div class="num">4</div>
+        <div class="label">Wilderness stations</div>
+      </div>
+      <div class="stat">
+        <div class="num">16</div>
+        <div class="label">Cross fragments (4 cards &times; 4 tribes)</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>The Journey</h2>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-icon">🍞</div>
+          <div class="timeline-title">1. Gathering Manna</div>
+          <div class="timeline-sub">Hoarding &rarr; God provides daily</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-icon">💧</div>
+          <div class="timeline-title">2. The Rock &amp; Water</div>
+          <div class="timeline-sub">Self-reliance &rarr; God is our source</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-icon">🐍</div>
+          <div class="timeline-title">3. The Serpent Encounter</div>
+          <div class="timeline-sub">Complaining &rarr; Jesus saves</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-icon">🔥</div>
+          <div class="timeline-title">4. Fire &amp; Cloud</div>
+          <div class="timeline-sub">Fear of the unknown &rarr; God leads through the dark</div>
+        </div>
+        <div class="timeline-item final">
+          <div class="timeline-icon">✝️</div>
+          <div class="timeline-title">Final Gathering at the Cross</div>
+          <div class="timeline-sub">All four fragments come together</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Tribes &amp; Setup</h2>
+      <div class="info-card">
+        Participants are divided into <strong>4 tribes</strong>. Each tribe chooses a
+        <strong>Tribe Leader</strong> &mdash; not the strongest or most competitive person, but someone
+        willing to encourage the tribe and hold the group together under pressure.
+        <ul>
+          <li>Tribe name / color</li>
+          <li>Small bag</li>
+          <li>Wilderness Journal / card holder &mdash; tribes collect 4 sealed cards and may not open them until the final gathering</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Wilderness Encounters</h2>
+
+      <div class="station">
+        <div class="station-head">
+          <div class="station-num">🍞</div>
+          <div>
+            <p class="station-title">1. Gathering Manna</p>
+            <p class="station-ref">Exodus 16</p>
+            <div class="chip-row">
+              <span class="chip weak">Weakness: Orphan Mindset</span>
+              <span class="chip good">Goodness: Daily Provision</span>
+            </div>
+            <p class="goal">A token economy lets students feel the hoarding impulse in their own hands, before Scripture is ever mentioned.</p>
+          </div>
+        </div>
+        <details>
+          <summary>Full script &amp; debrief</summary>
+          <div class="details-body">
+            <h4>Setup</h4>
+            <p>Each participant gets 5 tokens (survival capital). Across a simulated 4-day cycle, everyone must pay a mandatory Daily Cost into the tribe's center cup, or drop out. At any point they may also hide tokens away in a private envelope as "Future Insurance."</p>
+            <h4>How it unfolds</h4>
+            <ul>
+              <li><strong>Day 1</strong> &mdash; cost is 1 token, easy. Some start hoarding "just in case."</li>
+              <li><strong>Day 2</strong> &mdash; cost doubles to 2. A surprise "wilderness tax" makes half of every hoarded stash vanish.</li>
+              <li><strong>Day 3 (Relay Burst)</strong> &mdash; cost is 3, and hoarded tokens don't count. Tribes must physically relay-run to a distant basket to earn tokens fresh, one runner and one token at a time.</li>
+              <li><strong>Day 4</strong> &mdash; freeze the game. Everyone looks at their hands and envelopes.</li>
+            </ul>
+            <div class="twist">
+              <span class="twist-label">Debrief before Scripture</span>
+              Who froze up out of anxiety and never engaged? Who hoarded the moment uncertainty was mentioned &mdash; and how did it feel when the stockpile "spoiled," or didn't actually help on Day 3?
+            </div>
+            <h4>Scripture connection</h4>
+            <p>Israel stepped out of their tents in Exodus 16 and grabbed extra manna "just in case," even after seeing God provide. God moved them from an <strong>orphan mindset</strong> (protect and fend for yourself) to a <strong>child mindset</strong> (provision is daily and relational).</p>
+            <h4>Closing reflection</h4>
+            <p>Where in your finances, future, or relationships do you catch yourself hoarding control instead of trusting God's grace to be given daily?</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="station">
+        <div class="station-head">
+          <div class="station-num">💧</div>
+          <div>
+            <p class="station-title">2. The Rock &amp; Water</p>
+            <p class="station-ref">Exodus 17</p>
+            <div class="chip-row">
+              <span class="chip weak">Weakness: Self-Reliance</span>
+              <span class="chip good">Goodness: God Is Our Source</span>
+            </div>
+            <p class="goal">Success requires listening to teammates &mdash; and water is given freely at the end, not earned by performance.</p>
+          </div>
+        </div>
+        <details>
+          <summary>Full script &amp; debrief</summary>
+          <div class="details-body">
+            <h4>The game</h4>
+            <p>One tribe member wears noise-canceling headphones and attempts a dexterity puzzle. The rest of the tribe shouts, gestures, and tries to guide them through the noise. Leaders quietly watch for frustration directed at teammates &mdash; that matters more than whether the puzzle gets solved.</p>
+            <div class="twist">
+              <span class="twist-label">The twist &mdash; water isn't a prize</span>
+              Whether the tribe finishes quickly, slowly, or not at all, everyone gets water at the end, freely. Israel ran out of water and demanded Moses fix it &mdash; but the water came because Moses struck the rock and God provided, not because it was earned.
+            </div>
+            <h4>Debrief questions</h4>
+            <ul>
+              <li>What was frustrating about depending on someone else's directions &mdash; or not being heard?</li>
+              <li>Did anyone get impatient or short with a teammate? What was underneath that?</li>
+              <li>If your tribe struggled, who did you want to blame?</li>
+              <li>Where do you try to "make it happen yourself" instead of trusting God to provide?</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="station">
+        <div class="station-head">
+          <div class="station-num">🐍</div>
+          <div>
+            <p class="station-title">3. The Serpent Encounter</p>
+            <p class="station-ref">Numbers 21</p>
+            <div class="chip-row">
+              <span class="chip weak">Weakness: Complaining</span>
+              <span class="chip good">Goodness: Jesus Saves</span>
+            </div>
+            <p class="goal">Let complaining surface naturally, then reflect it back &mdash; the "cure" is simply looking, not fixing.</p>
+          </div>
+        </div>
+        <details>
+          <summary>Full script &amp; debrief</summary>
+          <div class="details-body">
+            <h4>Setup</h4>
+            <p>The tribe leader quietly receives a noticeably better snack; everyone else gets something smaller or plain. A nearby leader jots down a few grumbles as they happen, without drawing attention to it.</p>
+            <h4>The game</h4>
+            <p>Everyone except a sighted guide wears a blindfold. Distracting objects are scattered and a mini Jesus figure is hidden. The sighted guide verbally leads the blindfolded group toward it.</p>
+            <div class="twist">
+              <span class="twist-label">The twist &mdash; healing is found in looking, not fixing</span>
+              The cure for snakebite wasn't a remedy the people applied themselves &mdash; it was looking at the bronze serpent Moses lifted up. The "win" here isn't solving anything complicated; it's being led to look.
+            </div>
+            <h4>Reveal</h4>
+            <p>Read back 2&ndash;3 of the anonymous complaints collected earlier (no names). Israel said similar things: "Why did you bring us out here to die?" &mdash; looking at what they lacked instead of what God had already done.</p>
+            <h4>Debrief questions</h4>
+            <ul>
+              <li>How did it feel to receive a smaller or plainer snack while someone else got something better?</li>
+              <li>What did you find yourself saying or thinking?</li>
+              <li>What was it like to depend completely on someone else's voice while blind?</li>
+              <li>What would it look like for you to "look" instead of trying to fix your hard moment alone?</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="station">
+        <div class="station-head">
+          <div class="station-num">🔥</div>
+          <div>
+            <p class="station-title">4. Following the Fire &amp; Cloud</p>
+            <p class="station-ref">Exodus 13; Numbers 9:15&ndash;23</p>
+            <div class="chip-row">
+              <span class="chip weak">Weakness: Fear of the Unknown</span>
+              <span class="chip good">Goodness: God Leads Through the Dark</span>
+            </div>
+            <p class="goal">Tribes follow a light they don't control through darkness, hit a moment of stillness, and discover the answer was already in their hands.</p>
+          </div>
+        </div>
+        <details>
+          <summary>Full script &amp; debrief</summary>
+          <div class="details-body">
+            <h4>Setup</h4>
+            <p>Each of the four station cards has a fragment of a cross image on the back &mdash; 16 fragments total across all tribes' cards. No tribe can see the whole picture from their own set alone. This is built into the cards, not announced.</p>
+            <h4>The game</h4>
+            <p>Lights go out. Each tribe's guide reveals a flashlight only in short bursts; tribes move while lit and freeze in the dark. Paths are designed so all four tribes gradually converge on the same table from different directions.</p>
+            <div class="twist">
+              <span class="twist-label">The stillness</span>
+              As tribes near the convergence point, the flashlight goes out completely &mdash; full darkness and silence for 60&ndash;90 seconds. Then, spoken once, quietly, from an unseen location: <em>"In the wilderness, God said: 'I have already given you everything you need.' Do you really have nothing?"</em> Let it sit unanswered before the light returns.
+            </div>
+            <h4>The reveal</h4>
+            <p>The flashlight returns on the table holding all four tribes' sealed cards. Because they just heard the line moments before finding the cards, someone will likely flip their cards on instinct &mdash; recalling the earlier hint lines ("hold on to what you received," "what's in your hands will lead you later," "turn things over"). Fragments don't complete the picture alone; tribes start comparing with each other.</p>
+            <h4>Debrief questions</h4>
+            <ul>
+              <li>What did it feel like to be led through darkness by a light you couldn't control?</li>
+              <li>When you heard the line in the dark, with nothing visible yet &mdash; what went through your mind?</li>
+              <li>What did it feel like when the light came back on and you saw the table?</li>
+              <li>Was there a moment your tribe realized you couldn't finish alone?</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section>
+      <h2>Final Gathering at the Cross</h2>
+      <p class="purpose">
+        All four tribes converge, the cross shape already recognized from the fragments pieced together at
+        Station 4. Each tribe turns their four cards back to the front and reads what they say.
+      </p>
+
+      <table class="recap-table">
+        <thead>
+          <tr>
+            <th>Card</th>
+            <th>Weakness</th>
+            <th>Goodness</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Manna</td>
+            <td>Orphan mindset</td>
+            <td>God provides daily</td>
+          </tr>
+          <tr>
+            <td>Water</td>
+            <td>Self-reliance</td>
+            <td>God is our source</td>
+          </tr>
+          <tr>
+            <td>Bronze Serpent</td>
+            <td>Complaining</td>
+            <td>Jesus saves</td>
+          </tr>
+          <tr>
+            <td>Fire &amp; Cloud</td>
+            <td>Fear of the unknown</td>
+            <td>God leads, even through the dark</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="purpose" style="margin-top: 1.2rem;">
+        <strong>Personal reflection:</strong> the wilderness reveals what is inside our hearts &mdash; what did
+        God reveal in you? Everyone writes their weakness on paper and attaches it to the cross; on the flip
+        side, they write "God's goodness I need to remember" (provision, grace, forgiveness, faithfulness,
+        strength, love).
+      </p>
+
+      <blockquote class="closing">
+        <p>The Israelites entered the wilderness thinking their greatest problem was hunger, thirst, or danger. But God was revealing something deeper &mdash; their hearts.</p>
+        <p>Today, we discovered that our weaknesses are real. But God's goodness is greater.</p>
+        <p>The wilderness does not define us. God's faithfulness does.</p>
+        <p>The same God who led Israel through the wilderness is still leading us today.</p>
+      </blockquote>
+    </section>
+  </main>
+</body>
+</html>
