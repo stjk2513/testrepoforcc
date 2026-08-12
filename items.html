@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Items &amp; Packing</title>
+  <style>
+    :root {
+      --bg: #0e1a1c;
+      --bg-soft: #142428;
+      --card: #17282c;
+      --border: rgba(45, 212, 191, 0.2);
+      --accent: #2dd4bf;
+      --accent-light: #7fe8db;
+      --accent-dark: #0f9488;
+      --text: #edf7f6;
+      --muted: #9bb6b3;
+      --amber: #f0b545;
+      --red: #ef7a6b;
+      --green: #6fce8f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, #1c3438 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    nav {
+      background: #000;
+      padding: 1rem;
+    }
+
+    nav a.logo {
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.15rem 4rem;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(45, 212, 191, 0.1);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 0.4rem;
+      line-height: 1.15;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 1.6rem;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.4rem;
+    }
+
+    .stat {
+      flex: 1 1 100px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.8rem 0.9rem;
+    }
+
+    .stat .num {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+
+    .stat.total .num {
+      font-size: 1.1rem;
+    }
+
+    .stat .label {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-light);
+      margin: 0 0 0.9rem;
+    }
+
+    section {
+      margin-bottom: 2.6rem;
+    }
+
+    .section-note {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin: -0.4rem 0 1rem;
+    }
+
+    /* Tracker filter tabs */
+    .filter-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      font-family: inherit;
+      font-size: 0.8rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--accent-dark);
+      color: #04211d;
+      border-color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    /* Tracker item cards */
+    .item-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .item-card.hidden {
+      display: none;
+    }
+
+    .item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .item-name {
+      font-size: 0.98rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .status-badge {
+      flex-shrink: 0;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .status-badge.purchased {
+      background: rgba(111, 206, 143, 0.15);
+      color: var(--green);
+    }
+
+    .status-badge.not-purchased {
+      background: rgba(239, 122, 107, 0.15);
+      color: var(--red);
+    }
+
+    .status-badge.na {
+      background: rgba(155, 182, 179, 0.15);
+      color: var(--muted);
+    }
+
+    .item-meta {
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+
+    .item-meta span + span::before {
+      content: " \00b7 ";
+    }
+
+    .item-foot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .item-foot a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    .reimb {
+      font-size: 0.7rem;
+      padding: 0.12rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+
+    .grand-total {
+      text-align: right;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 0.8rem;
+      color: var(--accent-light);
+    }
+
+    /* Generic checklist */
+    ul.checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    ul.checklist li {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92rem;
+    }
+
+    ul.checklist li:last-child {
+      border-bottom: none;
+    }
+
+    ul.checklist li .qty {
+      margin-left: auto;
+      color: var(--muted);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .box h3 {
+      font-size: 0.92rem;
+      margin: 0 0 0.5rem;
+      color: var(--text);
+    }
+
+    /* Shopping day schedule */
+    .schedule-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .schedule-item:last-child {
+      border-bottom: none;
+    }
+
+    .schedule-item .who {
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    /* Accordions */
+    details.acc {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 0.7rem;
+      overflow: hidden;
+    }
+
+    details.acc summary {
+      cursor: pointer;
+      padding: 0.9rem 1.1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    details.acc summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.acc summary::before {
+      content: "\25B8";
+      color: var(--accent-light);
+      transition: transform 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    details.acc[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .acc-body {
+      padding: 0 1.1rem 1.1rem;
+    }
+
+    .acc-body .group-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin: 0.9rem 0 0.3rem;
+    }
+
+    .acc-body .group-label:first-child {
+      margin-top: 0;
+    }
+
+    /* Equipment table */
+    .equip-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .equip-table th,
+    .equip-table td {
+      text-align: left;
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .equip-table th {
+      color: var(--accent-light);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .equip-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .equip-table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+    }
+
+    /* Sponsor chips */
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .sponsor-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.86rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <span class="eyebrow">Team Lead View</span>
+    <h1>Items &amp; Packing</h1>
+    <p class="lede">Everything the team needs to buy, pack, and bring &mdash; pulled from the shared purchase tracker so it's easy to check on the go.</p>
+
+    <div class="stat-row">
+      <div class="stat total">
+        <div class="num">$1,854.64</div>
+        <div class="label">Grand total spent</div>
+      </div>
+      <div class="stat">
+        <div class="num">12</div>
+        <div class="label">Purchased</div>
+      </div>
+      <div class="stat">
+        <div class="num">4</div>
+        <div class="label">Still need to buy</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Purchase Tracker</h2>
+      <div class="filter-row" id="filterRow">
+        <button class="filter-btn active" data-filter="all">All (17)</button>
+        <button class="filter-btn" data-filter="purchased">Purchased (12)</button>
+        <button class="filter-btn" data-filter="not-purchased">Not Purchased (4)</button>
+        <button class="filter-btn" data-filter="na">N/A (1)</button>
+      </div>
+
+      <div id="itemList"></div>
+
+      <p class="grand-total">Grand Total: $1,854.64</p>
+    </section>
+
+    <section>
+      <h2>Store Runs</h2>
+      <div class="box">
+        <h3>Shopping Day Plan &mdash; meet at 1pm</h3>
+        <div class="schedule-item"><span>1. Costco FFX (Fri)</span><span class="who">MJ &amp; Lisa</span></div>
+        <div class="schedule-item"><span>2. Walmart (Sat)</span><span class="who">Lisa</span></div>
+        <div class="schedule-item"><span>3. Hmart Cville (Sat)</span><span class="who">Hyeri &amp; ST</span></div>
+      </div>
+
+      <details class="acc">
+        <summary>Walmart list</summary>
+        <div class="acc-body">
+          <ul class="checklist">
+            <li>Matzah <span class="qty">1 box</span></li>
+            <li>Alka-Seltzer <span class="qty">1 box</span></li>
+            <li>Reese's <span class="qty">2 packs</span></li>
+            <li>Pool noodles <span class="qty">2</span></li>
+            <li>Water guns <span class="qty">6</span></li>
+            <li>Solo cups <span class="qty">30&ndash;50 count</span></li>
+            <li>Popsicle sticks, variety pack <span class="qty"></span></li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="acc">
+        <summary>Costco list</summary>
+        <div class="acc-body">
+          <ul class="checklist">
+            <li>Cheez-It <span class="qty">1 box (45 ct)</span></li>
+            <li>요거트 Jelly <span class="qty">2 bags</span></li>
+            <li>초코렛 (chocolate) <span class="qty">1 bag</span></li>
+            <li>Pepto Bismol (liquid) <span class="qty">1 bottle</span></li>
+            <li>Emergen-C <span class="qty">1 box</span></li>
+            <li>Variety snack box <span class="qty">2 boxes</span></li>
+            <li>까르보 불닭 <span class="qty">2 boxes</span></li>
+            <li>햇반 (instant rice) <span class="qty">1 box</span></li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="acc">
+        <summary>Hmart list</summary>
+        <div class="acc-body">
+          <ul class="checklist">
+            <li>컵밥 (참치마요, at least 4) <span class="qty">12</span></li>
+            <li>고추참치 <span class="qty">1 pack</span></li>
+            <li>죽 (porridge) <span class="qty">5</span></li>
+            <li>믹스 커피 <span class="qty">1 box (~100 ct)</span></li>
+            <li>간식/사탕 (청포도, 새콤달콤/하이츄) <span class="qty"></span></li>
+            <li>몽쉘 (cacao) <span class="qty">2 boxes</span></li>
+            <li>Chopsticks <span class="qty">1 pack</span></li>
+            <li>김 (seaweed) <span class="qty">1 pack (~8 ct)</span></li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section>
+      <h2>Packing Lists</h2>
+
+      <details class="acc">
+        <summary>Things to take (readily available)</summary>
+        <div class="acc-body">
+          <p class="group-label">Living Room</p>
+          <ul class="checklist">
+            <li>String</li>
+            <li>Plastic bags</li>
+            <li>Plastic spoons</li>
+            <li>Ping pong balls</li>
+            <li>Scissors</li>
+            <li>Nametags</li>
+            <li>Canon printer</li>
+            <li>바구니 (baskets)</li>
+            <li>돼지코 220v (plug adapter)</li>
+            <li>YAJA present (slippers)</li>
+            <li>Biodance masks</li>
+            <li>Cross &amp; stand</li>
+            <li>Letters</li>
+            <li>Keycaps</li>
+            <li>Totebags</li>
+            <li>Hoodies</li>
+            <li>Arts &amp; crafts</li>
+            <li>Games</li>
+            <li>Extra pens</li>
+            <li>Sharpies</li>
+            <li>Shrinking papers &amp; oven</li>
+            <li>야광스틱 (glow sticks)</li>
+            <li>Straws</li>
+          </ul>
+          <p class="group-label">Church?</p>
+          <ul class="checklist">
+            <li>방석 (cushions)</li>
+          </ul>
+          <p class="group-label">Unassigned</p>
+          <ul class="checklist">
+            <li>묵상집 (devotional booklet)</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="acc">
+        <summary>Personal packing list (everyone)</summary>
+        <div class="acc-body">
+          <ul class="checklist">
+            <li>실내화 (indoor &amp; waterproof shoes)</li>
+            <li>치약/칫솔 (toothpaste/toothbrush)</li>
+            <li>샴푸/린스 (shampoo/conditioner)</li>
+            <li>수영복 (swimsuit, optional)</li>
+            <li>드라이어 (hair dryer)</li>
+            <li>아이패드 (iPad)</li>
+            <li>텀블러 (tumbler)</li>
+            <li>운동화 (sneakers)</li>
+            <li>1 roll of toilet paper</li>
+            <li>Weight scale</li>
+            <li>Noise cancelling headphones <span class="qty">Amy, MJ, Hyeri</span></li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="acc">
+        <summary>Assigned to specific members</summary>
+        <div class="acc-body">
+          <p class="group-label">Hyeri</p>
+          <ul class="checklist">
+            <li>멜라토닌 (melatonin)</li>
+            <li>Bluetooth speaker</li>
+            <li>3 gift bags for masks</li>
+            <li>Board games (Jenga, etc.)</li>
+            <li>비상약 (first aid / emergency meds)</li>
+            <li>이민가방 (large duffel bag)</li>
+          </ul>
+          <p class="group-label">창규 &amp; 리사</p>
+          <ul class="checklist">
+            <li>Coins (광야 activity)</li>
+          </ul>
+          <p class="group-label">MJ</p>
+          <ul class="checklist">
+            <li>Electric lighter</li>
+            <li>비타민 (vitamins)</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section>
+      <h2>Team Gear (팀 짐)</h2>
+      <div class="box">
+        <ul class="checklist">
+          <li>Praise team equipment <span class="qty">~1.5 bags</span></li>
+          <li>Mics</li>
+          <li>Mic stands</li>
+          <li>이민가방 (duffel bags) <span class="qty">15</span></li>
+          <li>Costco candy</li>
+          <li>HDMI cable</li>
+          <li>Bug spray</li>
+          <li>Keycaps</li>
+          <li>Totebags</li>
+          <li>Crewnecks</li>
+          <li>성찬기? (communion set)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>Equipment &amp; AV</h2>
+      <div class="equip-table-wrap">
+        <table class="equip-table">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Source</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Speakers</td><td>1</td><td>수련회장</td><td></td></tr>
+            <tr><td>Acoustic guitar</td><td>1</td><td>ODPC (윤전도사님)</td><td>Need to find hard case</td></tr>
+            <tr><td>Audio mixer</td><td>1</td><td>ODPC</td><td></td></tr>
+            <tr><td>Audio mixer power adapter</td><td>1</td><td>ODPC</td><td>Check if usable with 220v plug adapter</td></tr>
+            <tr><td>Microphone</td><td>4</td><td>ODPC</td><td></td></tr>
+            <tr><td>XLR cables</td><td>4</td><td>ODPC</td><td>Minimum 4</td></tr>
+            <tr><td>Instrument cables</td><td>5</td><td>ODPC</td><td>Minimum 5 (guitar, keyboard x2, drum pad, speaker)</td></tr>
+            <tr><td>Keyboard pedal</td><td>1</td><td>ODPC</td><td></td></tr>
+            <tr><td>Keyboard</td><td>1</td><td>Local church</td><td></td></tr>
+            <tr><td>Keyboard stand</td><td>1</td><td>Local church</td><td></td></tr>
+            <tr><td>Keyboard music stand</td><td>1</td><td>Local church</td><td></td></tr>
+            <tr><td>Mic stand</td><td>3</td><td>Local church</td><td>Worship leader, keyboard, speaker(?)</td></tr>
+            <tr><td>Music stand</td><td>4</td><td>Local church</td><td></td></tr>
+            <tr><td>Drum pad</td><td>1</td><td>John Kim</td><td></td></tr>
+            <tr><td>악보 (sheet music)</td><td>&mdash;</td><td>창규 to print</td><td>Just in case</td></tr>
+            <tr><td>iPad</td><td>&mdash;</td><td>Everyone brings own</td><td></td></tr>
+            <tr><td>Power converter</td><td>&mdash;</td><td>Need to buy</td><td></td></tr>
+            <tr><td>USB-B to C cable</td><td>&mdash;</td><td>Need to buy</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Dinner &amp; Snack Sponsors</h2>
+      <p class="section-note">저녁&amp;간식 후원자</p>
+      <div class="chip-list">
+        <span class="sponsor-chip">이찬영</span>
+        <span class="sponsor-chip">김상준</span>
+        <span class="sponsor-chip">최은경</span>
+        <span class="sponsor-chip">박윤민</span>
+        <span class="sponsor-chip">박한별</span>
+        <span class="sponsor-chip">박성수&amp;이재인</span>
+        <span class="sponsor-chip">김소연</span>
+        <span class="sponsor-chip">김송섭</span>
+        <span class="sponsor-chip">황예지</span>
+        <span class="sponsor-chip">데미안</span>
+        <span class="sponsor-chip">임지아</span>
+        <span class="sponsor-chip">이경민</span>
+        <span class="sponsor-chip">이향기</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const items = [
+      { status: "purchased", name: "Brown Cotton Fabric Bundle", vendor: "Amazon", qty: "1", price: "$13.54", by: "Hyeri", reimbursed: "No", link: "https://a.co/d/03XDUIsz" },
+      { status: "purchased", name: "Color Cotton Squares, Faith Beads, Fabric Glue, White Pens", vendor: "Amazon", qty: "1", price: "$43.83", by: "Hyeri", reimbursed: "No", link: "https://a.co/d/0cMVSvND" },
+      { status: "purchased", name: "Water balloons", vendor: "Amazon", qty: "1", price: "$19.07", by: "Hyeri", reimbursed: "No", link: "https://a.co/d/075O9PUb" },
+      { status: "purchased", name: "Canon Paper & Ink, Sticky Hands, Puzzle Set, Candle Holder, Blindfolds, Essential Oils, Ritz Cheese Dip, Oreo Dip, Water Blaster", vendor: "Amazon", qty: "1", price: "$231.86", by: "Hyeri", reimbursed: "No" },
+      { status: "purchased", name: "Arts & craft 준비물", vendor: "Amazon", qty: "", price: "$90.65", by: "Lisa" },
+      { status: "purchased", name: "Arts & craft 준비물", vendor: "Michaels", qty: "", price: "$50.77", by: "Lisa" },
+      { status: "not-purchased", name: "Arts & craft 준비물", vendor: "Michaels", qty: "", price: "" },
+      { status: "not-purchased", name: "Solo cups", vendor: "Walmart", qty: "", price: "", link: "https://a.co/d/0fzxdELB" },
+      { status: "not-purchased", name: "Pool noodles", vendor: "Walmart", qty: "", price: "" },
+      { status: "not-purchased", name: "마커펜 (markers)", vendor: "Walmart", qty: "", price: "" },
+      { status: "purchased", name: "Keycaps", vendor: "Alibaba", qty: "30", price: "$86.44", by: "Hyeri" },
+      { status: "purchased", name: "Totebags", vendor: "Totebag Factory", qty: "35", price: "$353.15", by: "이예선" },
+      { status: "purchased", name: "Crewnecks", vendor: "Team America", qty: "35", price: "$737.55", by: "이민주" },
+      { status: "purchased", name: "Gift for 선교사님 (missionary)", vendor: "Oofos", qty: "2", price: "$127.10", by: "이민주" },
+      { status: "na", name: "Colored paper", vendor: "Church", qty: "", price: "" },
+      { status: "purchased", name: "USB-B to C cable", vendor: "Amazon", qty: "1", price: "$5.29", by: "박창규", reimbursed: "No" },
+      { status: "purchased", name: "Power converter for mixer and oven", vendor: "Amazon", qty: "1", price: "$95.39", by: "박창규", reimbursed: "No", link: "https://www.amazon.com/dp/B0F5NPXGCB" },
+    ];
+
+    const statusLabel = { purchased: "Purchased", "not-purchased": "Not Purchased", na: "N/A" };
+
+    const itemList = document.getElementById("itemList");
+
+    function render() {
+      itemList.innerHTML = "";
+      items.forEach((item) => {
+        const card = document.createElement("div");
+        card.className = "item-card";
+        card.dataset.status = item.status;
+
+        const metaParts = [item.vendor];
+        if (item.qty) metaParts.push(`Qty ${item.qty}`);
+        if (item.price) metaParts.push(item.price);
+
+        card.innerHTML = `
+          <div class="item-top">
+            <span class="item-name">${item.name}</span>
+            <span class="status-badge ${item.status}">${statusLabel[item.status]}</span>
+          </div>
+          <div class="item-meta">${metaParts.map((p) => `<span>${p}</span>`).join("")}</div>
+          <div class="item-foot">
+            <span>${item.by ? `Bought by ${item.by}` : ""}</span>
+            <span>
+              ${item.link ? `<a href="${item.link}" target="_blank" rel="noopener">View link</a>` : ""}
+              ${item.reimbursed ? `<span class="reimb">Reimbursed: ${item.reimbursed}</span>` : ""}
+            </span>
+          </div>
+        `;
+        itemList.appendChild(card);
+      });
+    }
+
+    render();
+
+    document.getElementById("filterRow").addEventListener("click", (e) => {
+      const btn = e.target.closest(".filter-btn");
+      if (!btn) return;
+      document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const filter = btn.dataset.filter;
+      document.querySelectorAll(".item-card").forEach((card) => {
+        card.classList.toggle("hidden", filter !== "all" && card.dataset.status !== filter);
+      });
+    });
+  </script>
+</body>
+</html>
