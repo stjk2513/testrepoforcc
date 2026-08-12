@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>To Do</title>
+  <style>
+    :root {
+      --accent: #ff5a4e;
+      --accent-dark: #e6382b;
+      --bg: #f7f5f4;
+      --panel: #ffffff;
+      --border: #e6e0de;
+      --text: #241512;
+      --muted: #8a7773;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    nav {
+      background: #000;
+      padding: 1rem;
+    }
+
+    nav a.logo {
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0.25rem 0 1.25rem;
+    }
+
+    .board {
+      display: flex;
+      gap: 1.25rem;
+    }
+
+    .categories {
+      flex: 0 0 200px;
+    }
+
+    .category {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.6rem;
+      font-size: 1rem;
+      font-family: inherit;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .category.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .category .count {
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 0.15rem 0.55rem;
+    }
+
+    .detail {
+      flex: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      min-width: 0;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .back-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.3rem;
+      cursor: pointer;
+      color: var(--text);
+      padding: 0;
+      line-height: 1;
+    }
+
+    .detail-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    ul.todo-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .todo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .todo-item:last-child {
+      border-bottom: none;
+    }
+
+    .todo-item input[type="checkbox"] {
+      margin-top: 0.2rem;
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .todo-item label {
+      font-size: 0.98rem;
+      line-height: 1.4;
+    }
+
+    .todo-item.done label {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 0.95rem;
+      padding: 0.5rem 0;
+    }
+
+    @media (max-width: 640px) {
+      .board {
+        display: block;
+      }
+
+      .categories,
+      .detail {
+        display: none;
+      }
+
+      .categories.visible,
+      .detail.visible {
+        display: block;
+      }
+
+      .categories {
+        width: 100%;
+      }
+
+      .back-btn {
+        display: inline-block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <h1>To Do</h1>
+
+    <div class="board">
+      <div class="categories visible" id="categories"></div>
+
+      <div class="detail" id="detail">
+        <div class="detail-header">
+          <button class="back-btn" id="backBtn">&larr;</button>
+          <p class="detail-title" id="detailTitle"></p>
+        </div>
+        <ul class="todo-list" id="todoList"></ul>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "todoAppState";
+
+    const defaultCategories = [
+      {
+        id: "work",
+        name: "Work",
+        items: [],
+      },
+      {
+        id: "missions",
+        name: "Missions",
+        items: [
+          { text: "Read and memorize the contents of the wilderness project", done: false },
+          { text: "Create all the slides", done: false },
+          { text: "Make the booklet", done: false },
+          { text: "Make the QR code", done: false },
+          { text: "Go through our to-buy list again", done: false },
+          { text: "Call Turkish Airlines about the items we can carry", done: false },
+        ],
+      },
+    ];
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (Array.isArray(saved) && saved.length) return saved;
+      } catch (e) {}
+      return defaultCategories;
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(categories));
+    }
+
+    let categories = loadState();
+    let activeCategoryId = categories[0].id;
+
+    const categoriesEl = document.getElementById("categories");
+    const detailEl = document.getElementById("detail");
+    const detailTitle = document.getElementById("detailTitle");
+    const todoList = document.getElementById("todoList");
+    const backBtn = document.getElementById("backBtn");
+
+    function isMobile() {
+      return window.matchMedia("(max-width: 640px)").matches;
+    }
+
+    function renderCategories() {
+      categoriesEl.innerHTML = "";
+      categories.forEach((cat) => {
+        const btn = document.createElement("button");
+        btn.className = "category" + (cat.id === activeCategoryId ? " active" : "");
+        btn.innerHTML = `<span>${cat.name}</span><span class="count">${cat.items.length}</span>`;
+        btn.addEventListener("click", () => {
+          activeCategoryId = cat.id;
+          renderCategories();
+          renderDetail();
+          if (isMobile()) {
+            categoriesEl.classList.remove("visible");
+            detailEl.classList.add("visible");
+          }
+        });
+        categoriesEl.appendChild(btn);
+      });
+    }
+
+    function renderDetail() {
+      const cat = categories.find((c) => c.id === activeCategoryId);
+      detailTitle.textContent = cat.name;
+      todoList.innerHTML = "";
+
+      if (!cat.items.length) {
+        const empty = document.createElement("li");
+        empty.className = "empty-state";
+        empty.textContent = "No to-dos in this category yet.";
+        todoList.appendChild(empty);
+        return;
+      }
+
+      cat.items.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.className = "todo-item" + (item.done ? " done" : "");
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = item.done;
+        checkbox.id = `${cat.id}-${index}`;
+        checkbox.addEventListener("change", () => {
+          item.done = checkbox.checked;
+          saveState();
+          renderDetail();
+        });
+
+        const label = document.createElement("label");
+        label.setAttribute("for", checkbox.id);
+        label.textContent = item.text;
+
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        todoList.appendChild(li);
+      });
+    }
+
+    backBtn.addEventListener("click", () => {
+      detailEl.classList.remove("visible");
+      categoriesEl.classList.add("visible");
+    });
+
+    window.addEventListener("resize", () => {
+      if (!isMobile()) {
+        categoriesEl.classList.add("visible");
+        detailEl.classList.add("visible");
+      } else if (!detailEl.classList.contains("visible")) {
+        categoriesEl.classList.add("visible");
+      }
+    });
+
+    renderCategories();
+    renderDetail();
+  </script>
+</body>
+</html>
