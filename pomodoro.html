@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pomodoro</title>
+  <style>
+    :root {
+      --tomato: #ff5a4e;
+      --tomato-dark: #e6382b;
+      --tomato-deep: #c22a1f;
+      --bg: #1a0f0e;
+      --panel: #261614;
+      --text: #fff5f3;
+      --muted: #d99b93;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% -10%, #3a1c18 0%, var(--bg) 60%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    nav {
+      width: 100%;
+      background: #000;
+      padding: 1rem;
+    }
+
+    nav a.logo {
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    main {
+      width: 100%;
+      max-width: 420px;
+      padding: 2rem 1.5rem 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--tomato);
+      margin: 0.5rem 0 0;
+    }
+
+    .mode-pill {
+      display: inline-flex;
+      gap: 0.4rem;
+      background: rgba(255, 90, 78, 0.12);
+      border: 1px solid rgba(255, 90, 78, 0.35);
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .ring-wrap {
+      position: relative;
+      width: min(80vw, 300px);
+      height: min(80vw, 300px);
+    }
+
+    svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    circle {
+      fill: none;
+    }
+
+    .ring-bg {
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 12;
+    }
+
+    .ring-progress {
+      stroke: url(#tomatoGradient);
+      stroke-width: 12;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .time-display {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .time {
+      font-size: 3.2rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    .session-count {
+      margin-top: 0.25rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: flex;
+      gap: 0.9rem;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      border-radius: 999px;
+      font-weight: 600;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:active {
+      transform: scale(0.96);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--tomato) 0%, var(--tomato-dark) 100%);
+      color: #fff;
+      padding: 0.9rem 2.4rem;
+      font-size: 1rem;
+      box-shadow: 0 8px 24px rgba(230, 56, 43, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-toggle {
+      background: none;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .settings-toggle:hover {
+      color: var(--text);
+    }
+
+    .settings {
+      width: 100%;
+      background: var(--panel);
+      border: 1px solid rgba(255, 90, 78, 0.2);
+      border-radius: 16px;
+      padding: 1.25rem;
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .settings.open {
+      display: flex;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .setting-row label {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .setting-row input[type="number"] {
+      width: 4.5rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 0.5rem 0.6rem;
+      font-size: 1rem;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .setting-row input[type="number"]:focus {
+      outline: 2px solid var(--tomato);
+      outline-offset: 1px;
+    }
+
+    .apply-btn {
+      align-self: flex-end;
+      background: var(--tomato-deep);
+      color: #fff;
+      padding: 0.55rem 1.2rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <h1>Pomodoro</h1>
+    <div class="mode-pill" id="modeLabel">Focus</div>
+
+    <div class="ring-wrap">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="tomatoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff8a4c" />
+            <stop offset="100%" stop-color="#e6382b" />
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="100" cy="100" r="88" />
+        <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="88" />
+      </svg>
+      <div class="time-display">
+        <div class="time" id="timeDisplay">25:00</div>
+        <div class="session-count" id="sessionCount">Session 1</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-primary" id="startPauseBtn">Start</button>
+      <button class="btn-secondary" id="resetBtn">Reset</button>
+    </div>
+
+    <button class="settings-toggle" id="settingsToggle">&#9881; Customize durations</button>
+
+    <div class="settings" id="settingsPanel">
+      <div class="setting-row">
+        <label for="focusInput">Focus length (minutes)</label>
+        <input type="number" id="focusInput" min="1" max="180" value="25" />
+      </div>
+      <div class="setting-row">
+        <label for="shortBreakInput">Short break (minutes)</label>
+        <input type="number" id="shortBreakInput" min="1" max="60" value="5" />
+      </div>
+      <div class="setting-row">
+        <label for="longBreakInput">Long break (minutes)</label>
+        <input type="number" id="longBreakInput" min="1" max="60" value="15" />
+      </div>
+      <div class="setting-row">
+        <label for="cyclesInput">Focus sessions before long break</label>
+        <input type="number" id="cyclesInput" min="1" max="12" value="4" />
+      </div>
+      <button class="apply-btn" id="applyBtn">Apply</button>
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "pomodoroSettings";
+
+    const defaultSettings = {
+      focus: 25,
+      shortBreak: 5,
+      longBreak: 15,
+      cycles: 4,
+    };
+
+    function loadSettings() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && saved.focus && saved.shortBreak && saved.longBreak && saved.cycles) {
+          return saved;
+        }
+      } catch (e) {}
+      return { ...defaultSettings };
+    }
+
+    let settings = loadSettings();
+
+    const timeDisplay = document.getElementById("timeDisplay");
+    const modeLabel = document.getElementById("modeLabel");
+    const sessionCount = document.getElementById("sessionCount");
+    const startPauseBtn = document.getElementById("startPauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const settingsToggle = document.getElementById("settingsToggle");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const applyBtn = document.getElementById("applyBtn");
+    const ringProgress = document.getElementById("ringProgress");
+
+    const focusInput = document.getElementById("focusInput");
+    const shortBreakInput = document.getElementById("shortBreakInput");
+    const longBreakInput = document.getElementById("longBreakInput");
+    const cyclesInput = document.getElementById("cyclesInput");
+
+    const RADIUS = 88;
+    const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+    ringProgress.style.strokeDasharray = `${CIRCUMFERENCE}`;
+
+    let mode = "focus"; // focus | shortBreak | longBreak
+    let completedFocusSessions = 0;
+    let secondsLeft = settings.focus * 60;
+    let totalSeconds = settings.focus * 60;
+    let timerId = null;
+    let isRunning = false;
+
+    function modeLength(m) {
+      if (m === "focus") return settings.focus * 60;
+      if (m === "shortBreak") return settings.shortBreak * 60;
+      return settings.longBreak * 60;
+    }
+
+    function modeName(m) {
+      if (m === "focus") return "Focus";
+      if (m === "shortBreak") return "Short Break";
+      return "Long Break";
+    }
+
+    function updateDisplay() {
+      const mins = Math.floor(secondsLeft / 60).toString().padStart(2, "0");
+      const secs = Math.floor(secondsLeft % 60).toString().padStart(2, "0");
+      timeDisplay.textContent = `${mins}:${secs}`;
+      modeLabel.textContent = modeName(mode);
+      sessionCount.textContent = mode === "focus"
+        ? `Session ${completedFocusSessions + 1}`
+        : `After session ${completedFocusSessions}`;
+
+      const progress = 1 - secondsLeft / totalSeconds;
+      const offset = CIRCUMFERENCE * (1 - progress);
+      ringProgress.style.strokeDashoffset = offset;
+
+      document.title = `${mins}:${secs} · ${modeName(mode)}`;
+    }
+
+    function switchMode(nextMode) {
+      mode = nextMode;
+      totalSeconds = modeLength(mode);
+      secondsLeft = totalSeconds;
+      updateDisplay();
+    }
+
+    function tick() {
+      secondsLeft -= 1;
+      if (secondsLeft < 0) {
+        if (mode === "focus") {
+          completedFocusSessions += 1;
+          const nextMode = completedFocusSessions % settings.cycles === 0 ? "longBreak" : "shortBreak";
+          switchMode(nextMode);
+        } else {
+          switchMode("focus");
+        }
+      }
+      updateDisplay();
+    }
+
+    function start() {
+      if (isRunning) return;
+      isRunning = true;
+      startPauseBtn.textContent = "Pause";
+      timerId = setInterval(tick, 1000);
+    }
+
+    function pause() {
+      isRunning = false;
+      startPauseBtn.textContent = "Start";
+      clearInterval(timerId);
+    }
+
+    function reset() {
+      pause();
+      totalSeconds = modeLength(mode);
+      secondsLeft = totalSeconds;
+      updateDisplay();
+    }
+
+    startPauseBtn.addEventListener("click", () => {
+      isRunning ? pause() : start();
+    });
+
+    resetBtn.addEventListener("click", reset);
+
+    settingsToggle.addEventListener("click", () => {
+      settingsPanel.classList.toggle("open");
+    });
+
+    applyBtn.addEventListener("click", () => {
+      const focus = parseInt(focusInput.value, 10);
+      const shortBreak = parseInt(shortBreakInput.value, 10);
+      const longBreak = parseInt(longBreakInput.value, 10);
+      const cycles = parseInt(cyclesInput.value, 10);
+
+      if (!focus || !shortBreak || !longBreak || !cycles) return;
+
+      settings = { focus, shortBreak, longBreak, cycles };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+
+      pause();
+      completedFocusSessions = 0;
+      switchMode("focus");
+    });
+
+    focusInput.value = settings.focus;
+    shortBreakInput.value = settings.shortBreak;
+    longBreakInput.value = settings.longBreak;
+    cyclesInput.value = settings.cycles;
+
+    updateDisplay();
+  </script>
+</body>
+</html>
