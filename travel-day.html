@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Travel Day</title>
+  <style>
+    :root {
+      --bg: #0a1220;
+      --card: #101d30;
+      --border: rgba(56, 189, 248, 0.2);
+      --sky: #38bdf8;
+      --sky-light: #93dffb;
+      --sky-dark: #0284c7;
+      --text: #eaf3fb;
+      --muted: #8fa6be;
+      --green: #6fce8f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, #142a44 0%, var(--bg) 55%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    nav {
+      background: #000;
+      padding: 1rem;
+    }
+
+    nav a.logo {
+      color: #fff;
+      font-size: 1.25rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.15rem 4rem;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sky-light);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 0.4rem;
+      line-height: 1.15;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin: 0 0 1.6rem;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.4rem;
+    }
+
+    .stat {
+      flex: 1 1 100px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.8rem 0.9rem;
+    }
+
+    .stat .num {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--sky-light);
+    }
+
+    .stat .label {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    h2 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--sky-light);
+      margin: 0 0 0.3rem;
+    }
+
+    .leg-total {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 0 0 1rem;
+    }
+
+    section {
+      margin-bottom: 2.6rem;
+    }
+
+    /* Flight cards */
+    .flight-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .flight-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+
+    .flight-num {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .flight-status {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(111, 206, 143, 0.15);
+      color: var(--green);
+    }
+
+    .route-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .route-point {
+      flex: 1;
+    }
+
+    .route-time {
+      font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .route-place {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.1rem;
+    }
+
+    .route-arrow {
+      flex: 0 0 auto;
+      text-align: center;
+      color: var(--sky);
+      font-size: 0.75rem;
+    }
+
+    .route-arrow .plane {
+      font-size: 1.1rem;
+      display: block;
+    }
+
+    .flight-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.8rem;
+    }
+
+    .meta-chip {
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+    }
+
+    .layover {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 0.5rem 0;
+      position: relative;
+    }
+
+    .layover::before,
+    .layover::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: calc(50% - 5.5rem);
+      border-top: 1px dashed var(--border);
+    }
+
+    .layover::before {
+      left: 0;
+    }
+
+    .layover::after {
+      right: 0;
+    }
+
+    /* Info boxes */
+    .box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.9rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .box strong {
+      color: var(--text);
+    }
+
+    /* Roster */
+    .roster-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .roster-group h3 {
+      font-size: 0.82rem;
+      color: var(--sky-light);
+      margin: 0 0 0.5rem;
+      font-weight: 600;
+    }
+
+    .roster-table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table.roster {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      background: var(--card);
+    }
+
+    table.roster th,
+    table.roster td {
+      text-align: left;
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    table.roster th {
+      color: var(--sky-light);
+      font-size: 0.66rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    table.roster tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.roster td.name {
+      white-space: normal;
+      font-weight: 600;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <span class="eyebrow">Team Lead View</span>
+    <h1>Travel Day</h1>
+    <p class="lede">Turkish Airlines &middot; Washington Dulles &harr; Bishkek via Istanbul &middot; Aug 21&ndash;29, 2026</p>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="num">8</div>
+        <div class="label">Travelers</div>
+      </div>
+      <div class="stat">
+        <div class="num">4</div>
+        <div class="label">Flights total</div>
+      </div>
+      <div class="stat">
+        <div class="num">2PC</div>
+        <div class="label">Bags per person</div>
+      </div>
+    </div>
+
+    <section>
+      <h2>Outbound &mdash; Friday, Aug 21</h2>
+      <p class="leg-total">~17h door-to-door &middot; 15h05m flying + 1h55m layover in Istanbul</p>
+
+      <div class="flight-card">
+        <div class="flight-head">
+          <span class="flight-num">TK 008 &middot; Turkish Airlines</span>
+          <span class="flight-status">Confirmed</span>
+        </div>
+        <div class="route-row">
+          <div class="route-point">
+            <div class="route-time">21:45</div>
+            <div class="route-place">Fri, Aug 21<br>Washington Dulles (IAD)</div>
+          </div>
+          <div class="route-arrow"><span class="plane">&#9992;</span>10:05</div>
+          <div class="route-point" style="text-align: right;">
+            <div class="route-time">14:50</div>
+            <div class="route-place">Sat, Aug 22<br>Istanbul Airport (IST)</div>
+          </div>
+        </div>
+        <div class="flight-meta">
+          <span class="meta-chip">Nonstop</span>
+          <span class="meta-chip">Boeing 777-300ER</span>
+          <span class="meta-chip">Economy</span>
+          <span class="meta-chip">Meal service</span>
+        </div>
+      </div>
+
+      <div class="layover">Layover in Istanbul &middot; 1h 55m</div>
+
+      <div class="flight-card">
+        <div class="flight-head">
+          <span class="flight-num">TK 346 &middot; Turkish Airlines</span>
+          <span class="flight-status">Confirmed</span>
+        </div>
+        <div class="route-row">
+          <div class="route-point">
+            <div class="route-time">16:45</div>
+            <div class="route-place">Sat, Aug 22<br>Istanbul Airport (IST)</div>
+          </div>
+          <div class="route-arrow"><span class="plane">&#9992;</span>5:00</div>
+          <div class="route-point" style="text-align: right;">
+            <div class="route-time">00:45</div>
+            <div class="route-place">Sun, Aug 23<br>Manas Intl, Bishkek (FRU)</div>
+          </div>
+        </div>
+        <div class="flight-meta">
+          <span class="meta-chip">Nonstop</span>
+          <span class="meta-chip">Airbus A330-200</span>
+          <span class="meta-chip">Economy</span>
+          <span class="meta-chip">Meal service</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Return &mdash; Saturday, Aug 29</h2>
+      <p class="leg-total">~19h40m door-to-door &middot; 17h flying + 2h40m layover in Istanbul</p>
+
+      <div class="flight-card">
+        <div class="flight-head">
+          <span class="flight-num">TK 345 &middot; Turkish Airlines</span>
+          <span class="flight-status">Confirmed</span>
+        </div>
+        <div class="route-row">
+          <div class="route-point">
+            <div class="route-time">10:10</div>
+            <div class="route-place">Sat, Aug 29<br>Manas Intl, Bishkek (FRU)</div>
+          </div>
+          <div class="route-arrow"><span class="plane">&#9992;</span>6:00</div>
+          <div class="route-point" style="text-align: right;">
+            <div class="route-time">13:10</div>
+            <div class="route-place">Sat, Aug 29<br>Istanbul Airport (IST)</div>
+          </div>
+        </div>
+        <div class="flight-meta">
+          <span class="meta-chip">Nonstop</span>
+          <span class="meta-chip">Airbus A321neo</span>
+          <span class="meta-chip">Economy</span>
+          <span class="meta-chip">Meal service</span>
+        </div>
+      </div>
+
+      <div class="layover">Layover in Istanbul &middot; 2h 40m</div>
+
+      <div class="flight-card">
+        <div class="flight-head">
+          <span class="flight-num">TK 007 &middot; Turkish Airlines</span>
+          <span class="flight-status">Confirmed</span>
+        </div>
+        <div class="route-row">
+          <div class="route-point">
+            <div class="route-time">15:50</div>
+            <div class="route-place">Sat, Aug 29<br>Istanbul Airport (IST)</div>
+          </div>
+          <div class="route-arrow"><span class="plane">&#9992;</span>11:00</div>
+          <div class="route-point" style="text-align: right;">
+            <div class="route-time">19:50</div>
+            <div class="route-place">Sat, Aug 29<br>Washington Dulles (IAD)</div>
+          </div>
+        </div>
+        <div class="flight-meta">
+          <span class="meta-chip">Nonstop</span>
+          <span class="meta-chip">Boeing 787-9</span>
+          <span class="meta-chip">Economy</span>
+          <span class="meta-chip">Meal service</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Good to Know</h2>
+      <div class="box">
+        <p style="margin: 0 0 0.6rem;"><strong>Meeting time:</strong> plan to arrive well ahead of the 21:45 departure &mdash; international check-in and security can take a while at Dulles on a Friday night. Team lead to confirm exact meet-up time separately.</p>
+        <p style="margin: 0 0 0.6rem;"><strong>Baggage:</strong> everyone is allowed 2 checked pieces on all 4 flights.</p>
+        <p style="margin: 0;"><strong>Booking details:</strong> tickets are split across 3 separate reservations (all on the same flights). See the itinerary PDFs in Drive for booking references and e-ticket numbers &mdash; not reproduced here.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Who's Flying</h2>
+
+      <div class="roster-group">
+        <h3>Group 1</h3>
+        <div class="roster-table-wrap">
+          <table class="roster">
+            <thead>
+              <tr>
+                <th>Traveler</th>
+                <th>TK008</th>
+                <th>TK346</th>
+                <th>TK345</th>
+                <th>TK007</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="name">Lisa Kim</td><td>27G</td><td>09G</td><td>14C</td><td>15C</td></tr>
+              <tr><td class="name">Min Jou Lee</td><td>27H</td><td>09J</td><td>14D</td><td>16C</td></tr>
+              <tr><td class="name">Yeseon Amy Lee</td><td>28G</td><td>10G</td><td>18C</td><td>17C</td></tr>
+              <tr><td class="name">Natalie Hyeri Park</td><td>28H</td><td>10J</td><td>17C</td><td>18C</td></tr>
+              <tr><td class="name">Yong Sung Shin</td><td>26G</td><td>08G</td><td>12D</td><td>14D</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="roster-group">
+        <h3>Group 2</h3>
+        <div class="roster-table-wrap">
+          <table class="roster">
+            <thead>
+              <tr>
+                <th>Traveler</th>
+                <th>TK008</th>
+                <th>TK346</th>
+                <th>TK345</th>
+                <th>TK007</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="name">Daniel William Kim</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+              <tr><td class="name">Sung Tai Kim</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="leg-total">Seats not yet assigned in the booking.</p>
+      </div>
+
+      <div class="roster-group">
+        <h3>Group 3</h3>
+        <div class="roster-table-wrap">
+          <table class="roster">
+            <thead>
+              <tr>
+                <th>Traveler</th>
+                <th>TK008</th>
+                <th>TK346</th>
+                <th>TK345</th>
+                <th>TK007</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="name">Changkyu Pak</td><td>30H</td><td>15G</td><td>19C</td><td>18D</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
