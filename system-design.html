@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Design 101</title>
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --panel: #121828;
+    --panel-2: #171f34;
+    --border: #263153;
+    --text: #eaf0ff;
+    --muted: #9aa8c7;
+    --accent: #6ee7ff;
+    --accent-2: #a78bfa;
+    --accent-3: #ff8fab;
+    --accent-4: #7ee787;
+    --accent-5: #ffcb6b;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(1100px 500px at 15% -10%, rgba(110,231,255,0.14), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(167,139,250,0.14), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  nav {
+    background: #000;
+    padding: 1rem;
+  }
+
+  nav a.logo {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  main {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 1.1rem 4rem;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 2.75rem 0 2rem;
+    text-align: center;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(110, 231, 255, 0.08);
+    border: 1px solid rgba(110, 231, 255, 0.35);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 1.1rem;
+  }
+
+  .hero h1 {
+    font-size: 2rem;
+    line-height: 1.15;
+    margin: 0 0 0.9rem;
+    background: linear-gradient(100deg, #fff 20%, var(--accent) 55%, var(--accent-2) 85%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero p.lead {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.6rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-stats div {
+    text-align: center;
+  }
+
+  .hero-stats strong {
+    display: block;
+    font-size: 1.4rem;
+    color: var(--accent);
+  }
+
+  .hero-stats span {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* ---------- Section shell ---------- */
+  section.block {
+    margin-top: 3rem;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .section-num {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0.3rem 0 1.4rem;
+  }
+
+  /* ---------- Pillars ---------- */
+  .pillars {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .pillar {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pillar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--pillar-color, var(--accent));
+    opacity: 0.06;
+  }
+
+  .pillar-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: color-mix(in srgb, var(--pillar-color, var(--accent)) 20%, transparent);
+    margin-bottom: 0.85rem;
+  }
+
+  .pillar h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.02rem;
+    color: var(--pillar-color, var(--accent));
+  }
+
+  .pillar p {
+    margin: 0;
+    font-size: 0.87rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- Request flow diagram ---------- */
+  .diagram {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1.1rem;
+  }
+
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.35rem;
+  }
+
+  .node {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-align: left;
+  }
+
+  .node .emoji { font-size: 1.4rem; flex-shrink: 0; }
+  .node .label { font-size: 0.85rem; color: var(--text); font-weight: 600; display: block; }
+  .node .sub { font-size: 0.72rem; color: var(--muted); }
+
+  .arrow {
+    color: var(--muted);
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .node.db { border-color: var(--accent-4); }
+  .node.cache { border-color: var(--accent-5); }
+  .node.lb { border-color: var(--accent); }
+  .node.cdn { border-color: var(--accent-3); }
+  .node.svc { border-color: var(--accent-2); }
+
+  .diagram-caption {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+    margin-top: 1.1rem;
+  }
+
+  /* ---------- Tradeoff meters (CAP etc) ---------- */
+  .tradeoffs {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .tradeoff-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.1rem;
+  }
+
+  .tradeoff-card h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+  }
+
+  .meter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 0.55rem;
+  }
+
+  .meter-row span.tag {
+    width: 92px;
+    flex-shrink: 0;
+    color: var(--text);
+  }
+
+  .meter-track {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    overflow: hidden;
+  }
+
+  .meter-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+
+  /* ---------- Roadmap timeline ---------- */
+  .timeline {
+    position: relative;
+    padding-left: 1.9rem;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.55rem;
+    top: 0.3rem;
+    bottom: 0.3rem;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2), var(--accent-3));
+  }
+
+  .tstep {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  .tstep:last-child { margin-bottom: 0; }
+
+  .tstep::before {
+    content: attr(data-n);
+    position: absolute;
+    left: -1.9rem;
+    top: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tstep h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.02rem;
+  }
+
+  .tstep p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .tstep .chips {
+    margin-top: 0.55rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .chip {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  /* ---------- Glossary ---------- */
+  .glossary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .term {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+  }
+
+  .term .name {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .term .def {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ---------- Checklist ---------- */
+  .checklist {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+  }
+
+  .checklist ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .checklist li {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .checklist li::before {
+    content: "✓";
+    flex-shrink: 0;
+    width: 1.3rem;
+    height: 1.3rem;
+    border-radius: 50%;
+    background: rgba(126, 231, 135, 0.15);
+    color: var(--accent-4);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.05rem;
+  }
+
+  footer.note {
+    margin-top: 3rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+</style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <span class="eyebrow">Software Engineering &middot; Field Guide</span>
+      <h1>How to Learn System Design</h1>
+      <p class="lead">
+        System design is the art of turning a rough idea &mdash; "build something like Twitter" &mdash;
+        into components that talk to each other reliably at scale. This is a visual map of the
+        core ideas, the tradeoffs you'll keep re-fighting, and a roadmap for learning it in order.
+      </p>
+      <div class="hero-stats">
+        <div><strong>5</strong><span>core pillars</span></div>
+        <div><strong>6</strong><span>step roadmap</span></div>
+        <div><strong>12</strong><span>must-know terms</span></div>
+      </div>
+    </section>
+
+    <!-- 1. Pillars -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">1</span>
+        <h2>The Five Pillars</h2>
+      </div>
+      <p class="section-sub">Every system design conversation, no matter the product, keeps coming back to these five concerns.</p>
+
+      <div class="pillars">
+        <div class="pillar" style="--pillar-color: var(--accent)">
+          <div class="pillar-icon">📈</div>
+          <h3>Scalability</h3>
+          <p>Handling growth &mdash; more users, more data, more traffic &mdash; by adding resources (scale up) or machines (scale out).</p>
+        </div>
+        <div class="pillar" style="--pillar-color: var(--accent-4)">
+          <div class="pillar-icon">🛡️</div>
+          <h3>Availability</h3>
+          <p>Staying up and responsive even when parts fail. Measured in "nines" &mdash; 99.9% uptime is ~8.7 hours of downtime a year.</p>
+        </div>
+        <div class="pillar" style="--pillar-color: var(--accent-2)">
+          <div class="pillar-icon">🔄</div>
+          <h3>Consistency</h3>
+          <p>Making sure every reader sees the same (correct) data, even when it's replicated across many machines.</p>
+        </div>
+        <div class="pillar" style="--pillar-color: var(--accent-5)">
+          <div class="pillar-icon">⚡</div>
+          <h3>Latency &amp; Throughput</h3>
+          <p>How fast a single request completes, and how many requests the system can process per second.</p>
+        </div>
+        <div class="pillar" style="--pillar-color: var(--accent-3)">
+          <div class="pillar-icon">🧩</div>
+          <h3>Maintainability</h3>
+          <p>Can a new engineer understand, extend, and safely change this system a year from now?</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Anatomy of a request -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">2</span>
+        <h2>Anatomy of a Request</h2>
+      </div>
+      <p class="section-sub">A single click travels through more infrastructure than most people expect. Here's the typical path from browser to database and back.</p>
+
+      <div class="diagram">
+        <div class="flow">
+          <div class="node">
+            <span class="emoji">🧑‍💻</span>
+            <span><span class="label">Client</span><span class="sub">browser / app</span></span>
+          </div>
+          <div class="arrow">&darr;</div>
+          <div class="node cdn">
+            <span class="emoji">🌐</span>
+            <span><span class="label">CDN</span><span class="sub">static assets</span></span>
+          </div>
+          <div class="arrow">&darr;</div>
+          <div class="node lb">
+            <span class="emoji">⚖️</span>
+            <span><span class="label">Load Balancer</span><span class="sub">spreads traffic</span></span>
+          </div>
+          <div class="arrow">&darr;</div>
+          <div class="node svc">
+            <span class="emoji">🛠️</span>
+            <span><span class="label">App Servers</span><span class="sub">business logic</span></span>
+          </div>
+          <div class="arrow">&darr;</div>
+          <div class="node cache">
+            <span class="emoji">🚀</span>
+            <span><span class="label">Cache</span><span class="sub">Redis / memcached</span></span>
+          </div>
+          <div class="arrow">&darr;</div>
+          <div class="node db">
+            <span class="emoji">🗄️</span>
+            <span><span class="label">Database</span><span class="sub">source of truth</span></span>
+          </div>
+        </div>
+        <p class="diagram-caption">Cache miss? Fall through to the database, then write the result back into the cache for next time.</p>
+      </div>
+    </section>
+
+    <!-- 3. Tradeoffs -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">3</span>
+        <h2>Tradeoffs You Can't Avoid</h2>
+      </div>
+      <p class="section-sub">System design is rarely about finding the "right" answer &mdash; it's about picking which tradeoff fits the product's needs.</p>
+
+      <div class="tradeoffs">
+        <div class="tradeoff-card">
+          <h3>CAP Theorem</h3>
+          <div class="meter-row"><span class="tag">Consistency</span><div class="meter-track"><div class="meter-fill" style="width:85%"></div></div></div>
+          <div class="meter-row"><span class="tag">Availability</span><div class="meter-track"><div class="meter-fill" style="width:60%"></div></div></div>
+          <div class="meter-row"><span class="tag">Partition Tol.</span><div class="meter-track"><div class="meter-fill" style="width:100%"></div></div></div>
+          <p style="color:var(--muted);font-size:0.82rem;margin:0.5rem 0 0;">During a network partition, you can only pick <strong>C</strong> or <strong>A</strong> &mdash; not both. Most real systems pick availability and accept eventual consistency.</p>
+        </div>
+        <div class="tradeoff-card">
+          <h3>SQL vs. NoSQL</h3>
+          <div class="meter-row"><span class="tag">Strong schema</span><div class="meter-track"><div class="meter-fill" style="width:90%"></div></div></div>
+          <div class="meter-row"><span class="tag">Horizontal scale</span><div class="meter-track"><div class="meter-fill" style="width:40%"></div></div></div>
+          <p style="color:var(--muted);font-size:0.82rem;margin:0.5rem 0 0;">Relational databases give you joins and transactions; NoSQL stores trade that structure for easier sharding and flexible schemas.</p>
+        </div>
+        <div class="tradeoff-card">
+          <h3>Latency vs. Freshness</h3>
+          <div class="meter-row"><span class="tag">Cache TTL long</span><div class="meter-track"><div class="meter-fill" style="width:80%"></div></div></div>
+          <div class="meter-row"><span class="tag">Cache TTL short</span><div class="meter-track"><div class="meter-fill" style="width:30%"></div></div></div>
+          <p style="color:var(--muted);font-size:0.82rem;margin:0.5rem 0 0;">Longer caching means faster responses but staler data. Every cache needs an explicit invalidation strategy.</p>
+        </div>
+        <div class="tradeoff-card">
+          <h3>Vertical vs. Horizontal Scaling</h3>
+          <div class="meter-row"><span class="tag">Bigger machine</span><div class="meter-track"><div class="meter-fill" style="width:35%"></div></div></div>
+          <div class="meter-row"><span class="tag">More machines</span><div class="meter-track"><div class="meter-fill" style="width:95%"></div></div></div>
+          <p style="color:var(--muted);font-size:0.82rem;margin:0.5rem 0 0;">Vertical scaling is simple but hits a ceiling and creates a single point of failure. Horizontal scaling requires stateless services.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Roadmap -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">4</span>
+        <h2>A 6-Step Learning Roadmap</h2>
+      </div>
+      <p class="section-sub">Follow this order to build intuition before jumping into "design Twitter" style interview questions.</p>
+
+      <div class="timeline">
+        <div class="tstep" data-n="1">
+          <h3>Learn the vocabulary</h3>
+          <p>Get comfortable with the terms below &mdash; latency, throughput, availability, consistency &mdash; so every conversation isn't a translation exercise.</p>
+          <div class="chips"><span class="chip">Glossary</span><span class="chip">1 week</span></div>
+        </div>
+        <div class="tstep" data-n="2">
+          <h3>Understand a single server</h3>
+          <p>How does one web server, one app process, and one database work together? Learn what happens on a single request before adding more machines.</p>
+          <div class="chips"><span class="chip">HTTP</span><span class="chip">Databases</span><span class="chip">APIs</span></div>
+        </div>
+        <div class="tstep" data-n="3">
+          <h3>Add scale: caching &amp; load balancing</h3>
+          <p>Introduce a second server. Now you need a load balancer to split traffic and a cache to avoid hammering the database.</p>
+          <div class="chips"><span class="chip">Redis</span><span class="chip">Round robin</span><span class="chip">CDN</span></div>
+        </div>
+        <div class="tstep" data-n="4">
+          <h3>Split the data: replication &amp; sharding</h3>
+          <p>One database eventually can't keep up. Learn read replicas for scaling reads, and sharding for scaling writes.</p>
+          <div class="chips"><span class="chip">Replication</span><span class="chip">Sharding</span><span class="chip">Partitioning</span></div>
+        </div>
+        <div class="tstep" data-n="5">
+          <h3>Decouple with queues &amp; async work</h3>
+          <p>Not every task needs an instant response. Message queues let slow work (emails, video processing) happen in the background.</p>
+          <div class="chips"><span class="chip">Kafka</span><span class="chip">SQS</span><span class="chip">Pub/Sub</span></div>
+        </div>
+        <div class="tstep" data-n="6">
+          <h3>Practice full designs</h3>
+          <p>Combine everything above into end-to-end designs: a URL shortener, a chat app, a news feed. Draw the boxes, then say the tradeoffs out loud.</p>
+          <div class="chips"><span class="chip">Mock interviews</span><span class="chip">Whiteboard practice</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Glossary -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">5</span>
+        <h2>Must-Know Terms</h2>
+      </div>
+      <p class="section-sub">A quick-reference glossary for the words that show up in almost every system design discussion.</p>
+
+      <div class="glossary">
+        <div class="term"><div class="name">Load Balancer</div><div class="def">Distributes incoming requests across multiple servers so no single machine gets overwhelmed.</div></div>
+        <div class="term"><div class="name">Cache</div><div class="def">A fast, temporary data store (often in-memory) that avoids repeating expensive computations or database reads.</div></div>
+        <div class="term"><div class="name">Sharding</div><div class="def">Splitting a database into smaller pieces ("shards"), each holding a subset of the data, to scale writes horizontally.</div></div>
+        <div class="term"><div class="name">Replication</div><div class="def">Keeping copies of the same data on multiple machines for redundancy and to scale read traffic.</div></div>
+        <div class="term"><div class="name">CDN</div><div class="def">Content Delivery Network &mdash; servers spread around the world that cache static content close to users.</div></div>
+        <div class="term"><div class="name">Message Queue</div><div class="def">A buffer (like Kafka or SQS) that lets services communicate asynchronously without waiting on each other.</div></div>
+        <div class="term"><div class="name">Consistent Hashing</div><div class="def">A technique for spreading keys across servers so adding/removing a server only reshuffles a small fraction of data.</div></div>
+        <div class="term"><div class="name">Rate Limiting</div><div class="def">Capping how many requests a client can make in a time window to protect the system from abuse or overload.</div></div>
+        <div class="term"><div class="name">Idempotency</div><div class="def">An operation that produces the same result no matter how many times it's retried &mdash; crucial for safe retries.</div></div>
+        <div class="term"><div class="name">Eventual Consistency</div><div class="def">A guarantee that all replicas will converge to the same value &mdash; eventually, not necessarily right away.</div></div>
+        <div class="term"><div class="name">Single Point of Failure</div><div class="def">Any component whose failure takes down the whole system. Good designs eliminate these through redundancy.</div></div>
+        <div class="term"><div class="name">Horizontal Scaling</div><div class="def">Adding more machines to share the load, instead of making one machine bigger (vertical scaling).</div></div>
+      </div>
+    </section>
+
+    <!-- 6. Checklist -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">6</span>
+        <h2>Before You Design Anything</h2>
+      </div>
+      <p class="section-sub">A quick checklist to run through at the start of any system design exercise &mdash; interview or real project.</p>
+
+      <div class="checklist">
+        <ul>
+          <li>Clarify the requirements: what must it do, and what can it skip?</li>
+          <li>Estimate scale: how many users, requests per second, and how much data?</li>
+          <li>Define the API: what are the core read/write operations?</li>
+          <li>Sketch the high-level architecture before diving into details.</li>
+          <li>Pick a database and justify it with the access patterns.</li>
+          <li>Call out the bottleneck and how you'd scale past it.</li>
+          <li>Name the single points of failure and how to remove them.</li>
+          <li>State the tradeoffs out loud &mdash; there's rarely one right answer.</li>
+        </ul>
+      </div>
+    </section>
+
+    <footer class="note">
+      Keep this as a reference &mdash; system design is learned by revisiting the same ideas across many different problems.
+    </footer>
+  </main>
+</body>
+</html>
