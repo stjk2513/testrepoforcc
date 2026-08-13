@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Krebs Cycle</title>
+<style>
+  :root {
+    --bg: #0a0f0c;
+    --panel: #121a15;
+    --panel-2: #17211b;
+    --border: #263a2c;
+    --text: #eafff0;
+    --muted: #93a89b;
+    --accent: #7ee787;
+    --accent-2: #ffcb6b;
+    --accent-3: #ff8fab;
+    --accent-4: #6ee7ff;
+    --accent-5: #a78bfa;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(1000px 480px at 20% -10%, rgba(126,231,135,0.14), transparent 60%),
+      radial-gradient(800px 460px at 100% 0%, rgba(255,203,107,0.10), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  nav {
+    background: #000;
+    padding: 1rem;
+  }
+
+  nav a.logo {
+    color: #fff;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  main {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 1.1rem 4rem;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 2.75rem 0 2rem;
+    text-align: center;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(126, 231, 135, 0.08);
+    border: 1px solid rgba(126, 231, 135, 0.35);
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 1.1rem;
+  }
+
+  .hero h1 {
+    font-size: 2.1rem;
+    line-height: 1.15;
+    margin: 0 0 0.9rem;
+    background: linear-gradient(100deg, #fff 15%, var(--accent) 55%, var(--accent-2) 90%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero p.lead {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1.6rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-stats div { text-align: center; }
+  .hero-stats strong { display: block; font-size: 1.4rem; color: var(--accent); }
+  .hero-stats span { font-size: 0.72rem; color: var(--muted); }
+
+  /* ---------- Section shell ---------- */
+  section.block { margin-top: 3rem; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .section-num {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    width: 1.7rem;
+    height: 1.7rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  h2 { font-size: 1.25rem; margin: 0; }
+
+  .section-sub {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0.3rem 0 1.4rem;
+  }
+
+  /* ---------- Wheel diagram ---------- */
+  .wheel-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.1rem;
+  }
+
+  .wheel-hint {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin: 0 0 0.8rem;
+  }
+
+  .wheel-svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  .node circle {
+    fill: var(--panel-2);
+    stroke: var(--border);
+    stroke-width: 2;
+    transition: all .2s ease;
+    cursor: pointer;
+  }
+
+  .node text {
+    fill: var(--text);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+
+  .node.active circle {
+    stroke: var(--accent);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 7px rgba(126,231,135,0.7));
+  }
+
+  .step-arc {
+    fill: none;
+    stroke-width: 3;
+    opacity: 0.5;
+    transition: all .2s ease;
+    cursor: pointer;
+  }
+
+  .step-arc.active { opacity: 1; stroke-width: 5; }
+
+  .step-badge circle {
+    fill: var(--panel-2);
+    stroke: var(--border);
+    stroke-width: 1.5;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+
+  .step-badge text {
+    fill: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+    transition: fill .2s ease;
+  }
+
+  .step-badge.active circle {
+    fill: var(--accent);
+    stroke: var(--accent);
+    filter: drop-shadow(0 0 6px rgba(126,231,135,0.7));
+  }
+
+  .step-badge.active text { fill: var(--bg); }
+
+  .center-label {
+    fill: var(--muted);
+    font-size: 9px;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    letter-spacing: 0.03em;
+  }
+
+  .center-label.big { fill: var(--text); font-size: 12px; font-weight: 800; }
+
+  /* ---------- Detail panel ---------- */
+  .detail-panel {
+    margin-top: 1rem;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 92px;
+  }
+
+  .detail-eyebrow {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+  }
+
+  .detail-title { font-size: 1rem; font-weight: 700; margin: 0 0 0.4rem; }
+  .detail-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.55; margin: 0; }
+
+  .detail-chips { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.65rem; }
+  .detail-chip {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    background: var(--panel);
+  }
+
+  /* ---------- Play + tally ---------- */
+  .play-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.1rem;
+  }
+
+  .play-btn {
+    background: linear-gradient(100deg, var(--accent), var(--accent-4));
+    color: #06210c;
+    border: none;
+    font-weight: 800;
+    font-size: 0.92rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .play-btn:disabled { opacity: 0.6; cursor: default; }
+
+  .tally {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-top: 1.1rem;
+  }
+
+  .tally-tile {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.2rem;
+    text-align: center;
+  }
+
+  .tally-tile strong { display: block; font-size: 1.3rem; }
+  .tally-tile span { font-size: 0.6rem; color: var(--muted); }
+
+  .tally-note {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-top: 0.8rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- Flip cards ---------- */
+  .flipcards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .flipcard { perspective: 1200px; height: 118px; }
+
+  .flipcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform .55s cubic-bezier(.4,.2,.2,1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+
+  .flipcard.flipped .flipcard-inner { transform: rotateY(180deg); }
+
+  .flipcard-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .flipcard-front { background: var(--panel); }
+  .flipcard-back {
+    background: var(--panel-2);
+    transform: rotateY(180deg);
+  }
+
+  .flipcard-num {
+    font-size: 0.66rem;
+    color: var(--accent);
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+
+  .flipcard-name { font-size: 1.05rem; font-weight: 700; margin: 0; }
+  .flipcard-tap { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; }
+  .flipcard-fact { font-size: 0.82rem; color: var(--text); line-height: 1.5; margin: 0; }
+
+  /* ---------- Mnemonic ---------- */
+  .mnemonic-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .mnemonic-sentence {
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .mnemonic-sentence .lead-letter { color: var(--accent-2); }
+
+  .mnemonic-words {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+
+  .mnemonic-word {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.76rem;
+    color: var(--muted);
+  }
+
+  .mnemonic-word .first { color: var(--accent); font-weight: 800; }
+
+  /* ---------- Quiz ---------- */
+  .quiz-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quiz-q { font-weight: 700; font-size: 0.92rem; margin: 0 0 0.6rem; line-height: 1.4; }
+
+  .quiz-toggle {
+    font-size: 0.78rem;
+    color: var(--accent);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    font-weight: 700;
+  }
+
+  .quiz-a {
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.55;
+    display: none;
+  }
+
+  .quiz-card.open .quiz-a { display: block; }
+  .quiz-card.open .quiz-toggle { color: var(--accent-2); }
+
+  footer.note {
+    margin-top: 3rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+</style>
+</head>
+<body>
+  <nav>
+    <a class="logo" href="index.html">My Test Repo</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <span class="eyebrow">Biochemistry &middot; Field Guide</span>
+      <h1>The Krebs Cycle</h1>
+      <p class="lead">
+        Your cells' rotating energy factory. One little acetyl-CoA rolls in, spins around
+        eight enzyme stations, and rolls back out having handed off electrons, carbon, and
+        energy the whole way around. Tap around, spin it, and watch it work.
+      </p>
+      <div class="hero-stats">
+        <div><strong>8</strong><span>enzyme steps</span></div>
+        <div><strong>3</strong><span>NADH / turn</span></div>
+        <div><strong>2</strong><span>CO&#8322; / turn</span></div>
+      </div>
+    </section>
+
+    <!-- 1. Interactive wheel -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">1</span>
+        <h2>Spin the Cycle</h2>
+      </div>
+      <p class="section-sub">Tap any molecule or numbered step to learn what happens there &mdash; or hit play and watch a full turn.</p>
+
+      <div class="wheel-card">
+        <p class="wheel-hint">Tap a molecule &middot; tap a numbered step</p>
+
+        <svg class="wheel-svg" viewBox="0 0 320 320" id="wheelSvg">
+          <!-- step arcs -->
+          <path id="arc1" class="step-arc" d="M160,32 Q221,13 251,70" stroke="#7ee787"></path>
+          <path id="arc2" class="step-arc" d="M251,70 Q307,99 288,160" stroke="#ffcb6b"></path>
+          <path id="arc3" class="step-arc" d="M288,160 Q307,221 251,251" stroke="#ff8fab"></path>
+          <path id="arc4" class="step-arc" d="M251,251 Q221,307 160,288" stroke="#6ee7ff"></path>
+          <path id="arc5" class="step-arc" d="M160,288 Q99,307 70,251" stroke="#a78bfa"></path>
+          <path id="arc6" class="step-arc" d="M70,251 Q13,221 32,160" stroke="#7ee787"></path>
+          <path id="arc7" class="step-arc" d="M32,160 Q13,99 70,70" stroke="#ffcb6b"></path>
+          <path id="arc8" class="step-arc" d="M70,70 Q99,13 160,32" stroke="#ff8fab"></path>
+
+          <text x="160" y="153" class="center-label big">Acetyl-CoA</text>
+          <text x="160" y="168" class="center-label">enters at step 1</text>
+
+          <!-- step badges -->
+          <g class="step-badge" id="badge1" data-step="1"><circle cx="194" cy="78" r="15"></circle><text x="194" y="78">1</text></g>
+          <g class="step-badge" id="badge2" data-step="2"><circle cx="242" cy="126" r="15"></circle><text x="242" y="126">2</text></g>
+          <g class="step-badge" id="badge3" data-step="3"><circle cx="242" cy="194" r="15"></circle><text x="242" y="194">3</text></g>
+          <g class="step-badge" id="badge4" data-step="4"><circle cx="194" cy="242" r="15"></circle><text x="194" y="242">4</text></g>
+          <g class="step-badge" id="badge5" data-step="5"><circle cx="126" cy="242" r="15"></circle><text x="126" y="242">5</text></g>
+          <g class="step-badge" id="badge6" data-step="6"><circle cx="78" cy="194" r="15"></circle><text x="78" y="194">6</text></g>
+          <g class="step-badge" id="badge7" data-step="7"><circle cx="78" cy="126" r="15"></circle><text x="78" y="126">7</text></g>
+          <g class="step-badge" id="badge8" data-step="8"><circle cx="126" cy="78" r="15"></circle><text x="126" y="78">8</text></g>
+
+          <!-- molecule nodes -->
+          <g class="node" id="node0" data-node="0"><circle cx="160" cy="32" r="27"></circle><text x="160" y="32">OAA</text></g>
+          <g class="node" id="node1" data-node="1"><circle cx="251" cy="70" r="27"></circle><text x="251" y="70">Citrate</text></g>
+          <g class="node" id="node2" data-node="2"><circle cx="288" cy="160" r="27"></circle><text x="288" y="160">Isocitrate</text></g>
+          <g class="node" id="node3" data-node="3"><circle cx="251" cy="251" r="27"></circle><text x="251" y="251">&#945;-KG</text></g>
+          <g class="node" id="node4" data-node="4"><circle cx="160" cy="288" r="27"></circle><text x="160" y="288">SucCoA</text></g>
+          <g class="node" id="node5" data-node="5"><circle cx="70" cy="251" r="27"></circle><text x="70" y="251">Succinate</text></g>
+          <g class="node" id="node6" data-node="6"><circle cx="32" cy="160" r="27"></circle><text x="32" y="160">Fumarate</text></g>
+          <g class="node" id="node7" data-node="7"><circle cx="70" cy="70" r="27"></circle><text x="70" y="70">Malate</text></g>
+        </svg>
+
+        <div class="detail-panel" id="detailPanel">
+          <div class="detail-eyebrow">Start here</div>
+          <p class="detail-title">Welcome to the cycle</p>
+          <p class="detail-desc">Tap any of the 8 molecules or the numbered enzyme steps around the wheel to see what happens there. Or just hit play below.</p>
+        </div>
+
+        <div class="play-row">
+          <button class="play-btn" id="playBtn">&#9654; Spin the Cycle</button>
+        </div>
+
+        <div class="tally">
+          <div class="tally-tile"><strong id="tallyNADH">0</strong><span>NADH</span></div>
+          <div class="tally-tile"><strong id="tallyFADH2">0</strong><span>FADH&#8322;</span></div>
+          <div class="tally-tile"><strong id="tallyATP">0</strong><span>ATP</span></div>
+          <div class="tally-tile"><strong id="tallyCO2">0</strong><span>CO&#8322;</span></div>
+        </div>
+        <p class="tally-note">Each glucose sends <strong>2</strong> acetyl-CoA through the cycle (one per pyruvate) &mdash; so double every number above per glucose. Those NADH and FADH&#8322; then power the electron transport chain to make ~30&ndash;32 ATP total.</p>
+      </div>
+    </section>
+
+    <!-- 2. Flip cards -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">2</span>
+        <h2>Meet the Molecules</h2>
+      </div>
+      <p class="section-sub">Eight intermediates, one continuous loop. Tap a card to flip it and reveal a fun fact.</p>
+
+      <div class="flipcards" id="flipcards"></div>
+    </section>
+
+    <!-- 3. Mnemonic -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">3</span>
+        <h2>Remember It</h2>
+      </div>
+      <p class="section-sub">A classic mnemonic to lock in the order of all 8 intermediates.</p>
+
+      <div class="mnemonic-card">
+        <p class="mnemonic-sentence">
+          "<span class="lead-letter">C</span>an <span class="lead-letter">I</span> <span class="lead-letter">K</span>eep <span class="lead-letter">S</span>elling <span class="lead-letter">S</span>ex <span class="lead-letter">F</span>or <span class="lead-letter">M</span>oney, <span class="lead-letter">O</span>fficer?"
+        </p>
+        <div class="mnemonic-words">
+          <span class="mnemonic-word"><span class="first">C</span>itrate</span>
+          <span class="mnemonic-word"><span class="first">I</span>socitrate</span>
+          <span class="mnemonic-word"><span class="first">K</span>etoglutarate</span>
+          <span class="mnemonic-word"><span class="first">S</span>uccinyl-CoA</span>
+          <span class="mnemonic-word"><span class="first">S</span>uccinate</span>
+          <span class="mnemonic-word"><span class="first">F</span>umarate</span>
+          <span class="mnemonic-word"><span class="first">M</span>alate</span>
+          <span class="mnemonic-word"><span class="first">O</span>xaloacetate</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Quiz -->
+    <section class="block">
+      <div class="section-head">
+        <span class="section-num">4</span>
+        <h2>Test Yourself</h2>
+      </div>
+      <p class="section-sub">Tap "show answer" to check yourself &mdash; no pressure, this is just for fun.</p>
+
+      <div id="quizList"></div>
+    </section>
+
+    <footer class="note">
+      One turn per acetyl-CoA, two turns per glucose &mdash; the mitochondria never stop spinning.
+    </footer>
+  </main>
+
+  <script>
+    const nodeData = [
+      { name: "Oxaloacetate", abbr: "OAA", fact: "The 4-carbon molecule the cycle starts and ends with. It's regenerated every single turn, so the same handful of oxaloacetate molecules get reused over and over inside a cell." },
+      { name: "Citrate", abbr: "Citrate", fact: "A 6-carbon molecule — chemically the very same citrate found in lemons and oranges. It forms the instant acetyl-CoA joins oxaloacetate." },
+      { name: "Isocitrate", abbr: "Isocitrate", fact: "Citrate's rearranged twin. Same formula, different atom arrangement — the shuffle sets it up to be oxidized in the very next step." },
+      { name: "α-Ketoglutarate", abbr: "α-KG", fact: "A 5-carbon molecule. Losing a CO₂ right here is the cycle's first big energy payday — and it's also a building block for making the amino acid glutamate." },
+      { name: "Succinyl-CoA", abbr: "Succinyl-CoA", fact: "Holds a high-energy thioester bond, like a coiled spring. That stored energy gets cashed in one step later for a molecule of ATP (or GTP)." },
+      { name: "Succinate", abbr: "Succinate", fact: "Perfectly symmetric, which is actually a famous biochemistry trap — early scientists used its symmetry to help figure out how the whole cycle worked." },
+      { name: "Fumarate", abbr: "Fumarate", fact: "Has a rigid trans double bond. Adding water across that bond in the next step is what produces malate." },
+      { name: "Malate", abbr: "Malate", fact: "One last oxidation turns malate back into oxaloacetate, banking a final NADH and closing the loop — ready for a fresh acetyl-CoA." },
+    ];
+
+    const stepData = [
+      { n: 1, enzyme: "Citrate synthase", from: "OAA", to: "Citrate", desc: "Acetyl-CoA (2 carbons) fuses with oxaloacetate (4 carbons) to form citrate (6 carbons). This is the committed first step of the cycle.", produces: {} },
+      { n: 2, enzyme: "Aconitase", from: "Citrate", to: "Isocitrate", desc: "Citrate is rearranged into its isomer, isocitrate, priming it for the oxidation that happens next.", produces: {} },
+      { n: 3, enzyme: "Isocitrate dehydrogenase", from: "Isocitrate", to: "α-Ketoglutarate", desc: "The rate-limiting step of the whole cycle. Isocitrate is oxidized and loses a CO₂, generating the cycle's first NADH.", produces: { NADH: 1, CO2: 1 } },
+      { n: 4, enzyme: "α-Ketoglutarate dehydrogenase", from: "α-Ketoglutarate", to: "Succinyl-CoA", desc: "A second oxidative decarboxylation. Another CO₂ leaves, and a second NADH gets banked.", produces: { NADH: 1, CO2: 1 } },
+      { n: 5, enzyme: "Succinyl-CoA synthetase", from: "Succinyl-CoA", to: "Succinate", desc: "The only step in the cycle with substrate-level phosphorylation — it directly makes one ATP (or GTP), no electron transport chain required.", produces: { ATP: 1 } },
+      { n: 6, enzyme: "Succinate dehydrogenase", from: "Succinate", to: "Fumarate", desc: "This enzyme is embedded right in the inner mitochondrial membrane and doubles as Complex II of the electron transport chain, generating FADH₂.", produces: { FADH2: 1 } },
+      { n: 7, enzyme: "Fumarase", from: "Fumarate", to: "Malate", desc: "Water is added across fumarate's double bond, producing malate.", produces: {} },
+      { n: 8, enzyme: "Malate dehydrogenase", from: "Malate", to: "OAA", desc: "One final oxidation regenerates oxaloacetate and banks the cycle's third NADH — ready to greet a brand new acetyl-CoA.", produces: { NADH: 1 } },
+    ];
+
+    const quizData = [
+      { q: "Which two steps release CO₂?", a: "Steps 3 (isocitrate dehydrogenase) and 4 (α-ketoglutarate dehydrogenase) — the cycle's two oxidative decarboxylations." },
+      { q: "Which molecule starts and ends the cycle?", a: "Oxaloacetate (OAA). It combines with acetyl-CoA to start the cycle, and is regenerated at the very last step." },
+      { q: "Which step makes ATP directly, without the electron transport chain?", a: "Step 5, succinyl-CoA synthetase, via substrate-level phosphorylation — it makes GTP or ATP right on the spot." },
+      { q: "How many NADH does one full turn of the cycle produce?", a: "Three — from isocitrate dehydrogenase, α-ketoglutarate dehydrogenase, and malate dehydrogenase." },
+      { q: "Why does the cycle run twice per glucose molecule?", a: "Glycolysis splits one glucose into two pyruvate molecules, and each pyruvate becomes one acetyl-CoA — so two acetyl-CoA enter the cycle per glucose." },
+    ];
+
+    const wheel = {
+      activeNode: null,
+      activeStep: null,
+      playing: false,
+    };
+
+    function setActiveNode(idx) {
+      document.querySelectorAll(".node").forEach((el) => el.classList.remove("active"));
+      document.querySelectorAll(".step-badge, .step-arc").forEach((el) => el.classList.remove("active"));
+      const el = document.getElementById("node" + idx);
+      if (el) el.classList.add("active");
+    }
+
+    function setActiveStep(n) {
+      document.querySelectorAll(".node").forEach((el) => el.classList.remove("active"));
+      document.querySelectorAll(".step-badge, .step-arc").forEach((el) => el.classList.remove("active"));
+      const badge = document.getElementById("badge" + n);
+      const arc = document.getElementById("arc" + n);
+      if (badge) badge.classList.add("active");
+      if (arc) arc.classList.add("active");
+    }
+
+    function showNodeDetail(idx) {
+      const d = nodeData[idx];
+      const panel = document.getElementById("detailPanel");
+      panel.innerHTML =
+        '<div class="detail-eyebrow">Molecule</div>' +
+        '<p class="detail-title">' + d.name + '</p>' +
+        '<p class="detail-desc">' + d.fact + '</p>';
+    }
+
+    function showStepDetail(n) {
+      const s = stepData[n - 1];
+      const panel = document.getElementById("detailPanel");
+      let chips = '<span class="detail-chip">' + s.from + ' &rarr; ' + s.to + '</span>';
+      Object.keys(s.produces).forEach((k) => {
+        const label = k === "CO2" ? "CO₂" : k === "FADH2" ? "FADH₂" : k;
+        chips += '<span class="detail-chip">+' + s.produces[k] + ' ' + label + '</span>';
+      });
+      panel.innerHTML =
+        '<div class="detail-eyebrow">Step ' + n + '</div>' +
+        '<p class="detail-title">' + s.enzyme + '</p>' +
+        '<p class="detail-desc">' + s.desc + '</p>' +
+        '<div class="detail-chips">' + chips + '</div>';
+    }
+
+    document.querySelectorAll(".node").forEach((el) => {
+      el.addEventListener("click", () => {
+        const idx = parseInt(el.getAttribute("data-node"), 10);
+        setActiveNode(idx);
+        showNodeDetail(idx);
+      });
+    });
+
+    document.querySelectorAll(".step-badge").forEach((el) => {
+      el.addEventListener("click", () => {
+        const n = parseInt(el.getAttribute("data-step"), 10);
+        setActiveStep(n);
+        showStepDetail(n);
+      });
+    });
+
+    document.querySelectorAll(".step-arc").forEach((el, i) => {
+      el.addEventListener("click", () => {
+        const n = i + 1;
+        setActiveStep(n);
+        showStepDetail(n);
+      });
+    });
+
+    function resetTally() {
+      document.getElementById("tallyNADH").textContent = "0";
+      document.getElementById("tallyFADH2").textContent = "0";
+      document.getElementById("tallyATP").textContent = "0";
+      document.getElementById("tallyCO2").textContent = "0";
+    }
+
+    function addToTally(produces) {
+      Object.keys(produces).forEach((k) => {
+        const elId = "tally" + k;
+        const el = document.getElementById(elId);
+        if (el) el.textContent = String(parseInt(el.textContent, 10) + produces[k]);
+      });
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    async function playCycle() {
+      const btn = document.getElementById("playBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ Spinning…";
+      resetTally();
+
+      for (let n = 1; n <= 8; n++) {
+        setActiveStep(n);
+        showStepDetail(n);
+        addToTally(stepData[n - 1].produces);
+        await sleep(1100);
+      }
+
+      setActiveNode(0);
+      showNodeDetail(0);
+      btn.disabled = false;
+      btn.textContent = "↻ Spin Again";
+    }
+
+    document.getElementById("playBtn").addEventListener("click", playCycle);
+
+    // ---- Flip cards ----
+    const flipContainer = document.getElementById("flipcards");
+    nodeData.forEach((d, i) => {
+      const card = document.createElement("div");
+      card.className = "flipcard";
+      card.innerHTML =
+        '<div class="flipcard-inner">' +
+          '<div class="flipcard-face flipcard-front">' +
+            '<div class="flipcard-num">Molecule ' + (i + 1) + ' of 8</div>' +
+            '<p class="flipcard-name">' + d.name + '</p>' +
+            '<div class="flipcard-tap">Tap to reveal a fun fact &rarr;</div>' +
+          '</div>' +
+          '<div class="flipcard-face flipcard-back">' +
+            '<p class="flipcard-fact">' + d.fact + '</p>' +
+          '</div>' +
+        '</div>';
+      card.addEventListener("click", () => card.classList.toggle("flipped"));
+      flipContainer.appendChild(card);
+    });
+
+    // ---- Quiz ----
+    const quizContainer = document.getElementById("quizList");
+    quizData.forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "quiz-card";
+      card.innerHTML =
+        '<p class="quiz-q">' + item.q + '</p>' +
+        '<button type="button" class="quiz-toggle">Show answer</button>' +
+        '<p class="quiz-a">' + item.a + '</p>';
+      const toggle = card.querySelector(".quiz-toggle");
+      toggle.addEventListener("click", () => {
+        const open = card.classList.toggle("open");
+        toggle.textContent = open ? "Hide answer" : "Show answer";
+      });
+      quizContainer.appendChild(card);
+    });
+  </script>
+</body>
+</html>
